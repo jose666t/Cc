@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHADOW CC - MARKETPLACE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --neon-green: #00ff41;
+            --dark-bg: #050505;
+            --card-bg: #0d0d0d;
+            --accent-red: #ff3131;
+            --font-main: 'Share Tech Mono', monospace;
+            --font-terminal: 'VT323', monospace;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: var(--font-main);
+            margin: 0;
+            padding-bottom: 80px;
+            min-height: 100vh;
+        }
+
+        /* Loading Overlay */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 3px solid #111; border-top-color: var(--neon-green);
+            border-radius: 50%; animation: spin 1s infinite linear; margin-bottom: 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Auth Screen */
+        .auth-container {
+            max-width: 400px;
+            margin: 60px auto;
+            padding: 30px;
+            border: 1px solid var(--neon-green);
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+        }
+
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .auth-tab { 
+            flex: 1; padding: 10px; background: none; border: 1px solid #333; 
+            color: #555; cursor: pointer; font-family: var(--font-terminal);
+        }
+        .auth-tab.active { border-color: var(--neon-green); color: var(--neon-green); }
+
+        input, select {
+            width: 100%; background: #000; border: 1px solid #333;
+            color: var(--neon-green); padding: 12px; margin-bottom: 15px;
+            font-family: var(--font-main); border-radius: 6px; outline: none;
+        }
+        input:focus { border-color: var(--neon-green); }
+
+        .btn-primary {
+            width: 100%; background: var(--neon-green); color: #000;
+            border: none; padding: 15px; font-weight: bold; border-radius: 6px;
+            cursor: pointer; font-family: var(--font-main); text-transform: uppercase;
+        }
+        .btn-google {
+            width: 100%; background: #fff; color: #000;
+            border: none; padding: 12px; font-weight: bold; border-radius: 6px;
+            cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        /* App Layout */
+        header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(0, 255, 65, 0.2); }
+        .skull { font-size: 40px; color: var(--accent-red); text-shadow: 0 0 10px red; }
+        h1 { margin: 0; font-family: var(--font-terminal); font-size: 1.8rem; letter-spacing: 4px; }
+
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+
+        /* Marketplace Cards */
+        .cc-card {
+            background: var(--card-bg); border: 1px solid rgba(0, 255, 65, 0.2);
+            margin-bottom: 20px; border-radius: 12px; overflow: hidden;
+        }
+        .cc-header { background: var(--neon-green); color: #000; padding: 8px 15px; font-weight: bold; font-size: 0.75rem; display: flex; justify-content: space-between; }
+        .cc-body { padding: 20px; }
+        .bin-text { font-size: 1.6rem; color: #fff; display: block; margin-bottom: 10px; letter-spacing: 2px; }
+        .price-text { color: var(--accent-red); font-size: 1.3rem; font-weight: bold; text-align: right; }
+
+        /* Nav Bar */
+        .nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #000; border-top: 1px solid var(--neon-green);
+            display: flex; justify-content: space-around; padding: 15px 0; z-index: 1000;
+        }
+        .nav-item { background: none; border: none; color: var(--neon-green); opacity: 0.5; font-family: var(--font-terminal); font-size: 1rem; }
+        .nav-item.active { opacity: 1; text-shadow: 0 0 10px var(--neon-green); }
+
+        /* Views */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        /* Modals */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 5000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content { background: #0a0a0a; border: 1px solid var(--neon-green); padding: 25px; width: 100%; max-width: 400px; border-radius: 12px; }
+
+        .admin-section { background: #111; border: 1px solid var(--neon-green); padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div style="font-family: var(--font-terminal);">SYNCHRONIZING SECURE NETWORK...</div>
+    </div>
+
+    <!-- AUTH VIEW -->
+    <div id="view-auth" class="view active">
+        <div class="auth-container">
+            <h2 style="text-align:center; font-family: var(--font-terminal); color: var(--accent-red);">ACCESO RESTRINGIDO</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="setAuthMode('login')">LOGIN</button>
+                <button class="auth-tab" onclick="setAuthMode('signup')">SIGNUP</button>
+            </div>
+            
+            <input type="email" id="auth-email" placeholder="Email">
+            <input type="password" id="auth-pass" placeholder="Password">
+            <button class="btn-primary" onclick="handleEmailAuth()" id="btn-auth-submit">ENTRAR AL SISTEMA</button>
+            
+            <div style="text-align:center; margin: 15px 0; font-size: 0.8rem; color: #555;">OR</div>
+            
+            <button class="btn-google" onclick="handleGoogleAuth()">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Continuar con Google
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN APP VIEW -->
+    <div id="view-app" class="view">
+        <header>
+            <div class="skull">💀</div>
+            <h1>SHADOW CC</h1>
+            <div id="user-info" style="font-size: 0.7rem; color: #555; margin-top: 5px;"></div>
+        </header>
+
+        <div class="container">
+            <!-- STORE -->
+            <div id="sub-store" class="sub-view active">
+                <input type="text" class="search-input" placeholder="Filtrar BIN o País..." onkeyup="filterStore(this.value)" style="margin-bottom: 20px;">
+                <div id="store-grid"></div>
+            </div>
+
+            <!-- ADMIN -->
+            <div id="sub-admin" class="sub-view">
+                <div id="admin-login" style="text-align:center; padding: 40px 0;">
+                    <h3>LLAVE MAESTRA REQUERIDA</h3>
+                    <input type="password" id="admin-pass-key" placeholder="Contraseña Admin">
+                    <button class="btn-primary" onclick="checkAdminKey()">DESBLOQUEAR</button>
+                </div>
+                
+                <div id="admin-panel" style="display:none;">
+                    <div class="admin-section">
+                        <h3>Añadir Stock</h3>
+                        <input type="text" id="add-bin" placeholder="BIN (4003 4499)">
+                        <input type="text" id="add-country" placeholder="País (USA 🇺🇸)">
+                        <input type="text" id="add-price" placeholder="Precio ($)">
+                        <button class="btn-primary" onclick="addStock()">AÑADIR A LA NUBE</button>
+                    </div>
+                    <div class="admin-section">
+                        <h3>Ajustes</h3>
+                        <label>WHATSAPP:</label>
+                        <input type="text" id="set-phone" placeholder="50582269592">
+                        <button class="btn-primary" style="background:#333; color:white;" onclick="saveSettings()">GUARDAR</button>
+                    </div>
+                    <div id="admin-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="nav-bar">
+            <button class="nav-item active" onclick="showSubView('store')">🛒 TIENDA</button>
+            <button class="nav-item" onclick="showSubView('admin')">🛡️ ADMIN</button>
+            <button class="nav-item" onclick="handleLogout()">🚪 SALIR</button>
+        </nav>
+    </div>
+
+    <!-- ORDER MODAL -->
+    <div id="order-modal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-top:0;">CONFIRMAR PEDIDO</h3>
+            <div id="modal-details" style="background:#000; padding:10px; margin-bottom:15px; font-size:0.8rem; border:1px dashed #222;"></div>
+            <input type="text" id="cust-city" placeholder="Ciudad de residencia">
+            <div style="display:flex; gap:10px;">
+                <button class="btn-primary" style="background:#444; color:#fff;" onclick="closeModal()">CANCELAR</button>
+                <button class="btn-primary" onclick="confirmOrder()">WHATSAPP</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC17dzIZSZtMbzu5V7dIHWdm6nDmoBN-KY",
+            authDomain: "shadow-music-f033d.firebaseapp.com",
+            projectId: "shadow-music-f033d",
+            storageBucket: "shadow-music-f033d.firebasestorage.app",
+            messagingSenderId: "358954790180",
+            appId: "1:358954790180:web:ef7abfb3fc45b291d657b1"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = "shadow-cc-app";
+
+        let currentUser = null;
+        let authMode = 'login';
+        let stock = [];
+        let config = { phone: "50582269592", pass: "admin123" };
+        let activeItem = null;
+
+        // --- AUTH LOGIC ---
+        window.setAuthMode = (mode) => {
+            authMode = mode;
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('btn-auth-submit').innerText = mode === 'login' ? 'ENTRAR AL SISTEMA' : 'CREAR CUENTA';
+        };
+
+        window.handleGoogleAuth = async () => {
+            try {
+                const provider = new GoogleAuthProvider();
+                await signInWithPopup(auth, provider);
+            } catch (e) { alert("Error con Google Auth"); }
+        };
+
+        window.handleEmailAuth = async () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(!email || !pass) return alert("Completa los datos");
+            try {
+                if(authMode === 'login') await signInWithEmailAndPassword(auth, email, pass);
+                else await createUserWithEmailAndPassword(auth, email, pass);
+            } catch (e) { alert("Error: " + e.message); }
+        };
+
+        window.handleLogout = () => signOut(auth);
+
+        // --- APP LOGIC ---
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if(user) {
+                document.getElementById('view-auth').classList.remove('active');
+                document.getElementById('view-app').classList.add('active');
+                document.getElementById('user-info').innerText = "SESSION: " + user.email;
+                initData();
+            } else {
+                document.getElementById('view-app').classList.remove('active');
+                document.getElementById('view-auth').classList.add('active');
+                document.getElementById('loading-screen').style.display = 'none';
+            }
+        });
+
+        function initData() {
+            // Config
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config'), (s) => {
+                if(s.exists()) {
+                    config = s.data();
+                    document.getElementById('set-phone').value = config.phone;
+                } else {
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config'), config);
+                }
+            });
+
+            // Stock
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'stock'), (s) => {
+                stock = s.docs.map(d => ({id: d.id, ...d.data()}));
+                renderStore(stock);
+                renderAdminList();
+                document.getElementById('loading-screen').style.display = 'none';
+            });
+        }
+
+        window.showSubView = (view) => {
+            document.querySelectorAll('.sub-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('sub-' + view).classList.add('active');
+            event.target.classList.add('active');
+        };
+
+        function renderStore(data) {
+            const grid = document.getElementById('store-grid');
+            grid.innerHTML = data.length ? '' : '<div style="text-align:center; padding:40px; opacity:0.3;">SIN STOCK DISPONIBLE</div>';
+            data.forEach(item => {
+                grid.innerHTML += `
+                    <div class="cc-card">
+                        <div class="cc-header"><span>NOD_ONLINE</span><span>SECURE</span></div>
+                        <div class="cc-body">
+                            <span class="bin-text">${item.bin}xxxx</span>
+                            <div style="display:flex; justify-content:space-between; font-size:0.8rem; opacity:0.6;">
+                                <span>PAÍS: ${item.country}</span>
+                                <span style="color:var(--accent-red)">PRECIO: $${item.price}</span>
+                            </div>
+                            <button class="btn-primary" style="margin-top:15px;" onclick="openOrder('${item.id}')">ORDENAR ACCESO</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        window.openOrder = (id) => {
+            activeItem = stock.find(i => i.id === id);
+            document.getElementById('modal-details').innerHTML = `
+                BIN: ${activeItem.bin}xxxx<br>PAÍS: ${activeItem.country}<br>PRECIO: $${activeItem.price}
+            `;
+            document.getElementById('order-modal').style.display = 'flex';
+        };
+
+        window.closeModal = () => document.getElementById('order-modal').style.display = 'none';
+
+        window.confirmOrder = () => {
+            const city = document.getElementById('cust-city').value;
+            if(!city) return alert("Ingresa tu ciudad");
+
+            const msg = `⚡ *NUEVA ORDEN - SHADOW CC* ⚡
+━━━━━━━━━━━━━━━━━━━━━
+╭━━ *𝓓𝓮𝓽𝓪𝓵𝓵𝓮𝓼 𝓭𝓮 𝓵𝓪 𝓣𝓪𝓻𝓳𝓮𝓽𝓪* ━━╮
+┃
+┃ 📟 *BIN:* ${activeItem.bin}xxxx
+┃ 🌍 *PAÍS:* ${activeItem.country}
+┃ 💰 *PRECIO:* $${activeItem.price}
+┃
+╰━━━━━━━━━━━━━━━━━━━━╯
+
+╭━━ *𝓘𝓷𝓯𝓸𝓻𝓶𝓪𝓬𝓲𝓸𝓷 𝓭𝓮𝓵 𝓒𝓵𝓲𝓮𝓷𝓽𝓮* ━━╮
+┃
+┃ 👤 *Usuario:* ${currentUser.email}
+┃ 🏙️ *Ciudad:* ${city}
+┃
+╰━━━━━━━━━━━━━━━━━━━━╯
+━━━━━━━━━━━━━━━━━━━━━
+*STATUS: PENDING_CONFIRMATION* 🚩`;
+
+            window.open(`https://api.whatsapp.com/send?phone=${config.phone}&text=${encodeURIComponent(msg)}`, '_blank');
+            closeModal();
+        };
+
+        // --- ADMIN FUNCTIONS ---
+        window.checkAdminKey = () => {
+            if(document.getElementById('admin-pass-key').value === config.pass) {
+                document.getElementById('admin-login').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+            } else { alert("Llave Incorrecta"); }
+        };
+
+        window.addStock = async () => {
+            const bin = document.getElementById('add-bin').value;
+            const country = document.getElementById('add-country').value;
+            const price = document.getElementById('add-price').value;
+            if(!bin || !price) return alert("Faltan datos");
+            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'stock'), { bin, country, price });
+            document.getElementById('add-bin').value = '';
+            document.getElementById('add-price').value = '';
+        };
+
+        window.deleteStock = async (id) => {
+            if(confirm("¿Eliminar?")) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'stock', id));
+        };
+
+        window.renderAdminList = () => {
+            const list = document.getElementById('admin-list');
+            list.innerHTML = '<h3 style="margin-top:20px;">Inventario Nube</h3>';
+            stock.forEach(item => {
+                list.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #222; font-size:0.8rem;">
+                        <span>${item.bin} (${item.country})</span>
+                        <button onclick="deleteStock('${item.id}')" style="color:red; background:none; border:none;">[X]</button>
+                    </div>
+                `;
+            });
+        };
+
+        window.saveSettings = async () => {
+            const phone = document.getElementById('set-phone').value.replace(/\D/g, '');
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'config'), { ...config, phone });
+            alert("Guardado");
+        };
+
+        window.filterStore = (val) => {
+            const filtered = stock.filter(i => i.bin.includes(val) || i.country.toLowerCase().includes(val.toLowerCase()));
+            renderStore(filtered);
+        };
+
+    </script>
+</body>
+</html>
+
