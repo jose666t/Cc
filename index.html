@@ -7,12 +7,13 @@
     <title>SHADOW CC - PREMIUM MARKET</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700&display=swap');
         
         :root {
             --neon: #00ff41;
-            --bg: #050505;
+            --bg: #030303;
             --accent: #ff3131;
+            --card-grad: linear-gradient(135deg, #0f172a 0%, #000000 100%);
         }
 
         body {
@@ -22,206 +23,219 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .terminal-font { font-family: 'VT323', monospace; }
+        .premium-font { font-family: 'Orbitron', sans-serif; }
 
-        .hacker-card {
-            background: rgba(10, 10, 10, 0.95);
-            border: 1px solid rgba(0, 255, 65, 0.2);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
-            transition: all 0.3s ease;
+        /* Estilo Tarjeta Física 3D */
+        .cc-visual {
+            aspect-ratio: 1.58 / 1;
+            background: var(--card-grad);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 255, 65, 0.05);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
         }
 
-        .hacker-card:hover {
+        .cc-visual:hover {
+            transform: translateY(-5px) rotateX(5deg) rotateY(2deg);
             border-color: var(--neon);
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 255, 65, 0.15);
+        }
+
+        .cc-chip {
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #d4af37 0%, #f1c40f 50%, #b8860b 100%);
+            border-radius: 6px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .cc-chip::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(90deg, transparent 0, transparent 10px, rgba(0,0,0,0.1) 11px);
+        }
+
+        .hacker-card {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         input, select {
-            background: #000 !important;
-            border: 1px solid #333 !important;
+            background: #0a0a0a !important;
+            border: 1px solid #1a1a1a !important;
             color: var(--neon) !important;
             outline: none;
         }
 
-        input:focus {
-            border-color: var(--neon) !important;
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
-        }
-
         .scanline {
-            width: 100%;
-            height: 2px;
-            background: rgba(0, 255, 65, 0.05);
-            position: fixed;
-            top: 0;
-            z-index: 9999;
-            pointer-events: none;
-            animation: scan 4s linear infinite;
+            width: 100%; height: 2px;
+            background: rgba(0, 255, 65, 0.03);
+            position: fixed; top: 0; z-index: 9999;
+            pointer-events: none; animation: scan 6s linear infinite;
         }
 
-        @keyframes scan {
-            0% { top: 0; }
-            100% { top: 100%; }
-        }
+        @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
 
         .nav-link.active {
             color: white;
-            border-top: 2px solid var(--neon);
             text-shadow: 0 0 10px var(--neon);
             opacity: 1;
         }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
-<body class="pb-24 overflow-x-hidden">
+<body class="pb-24">
 
     <div class="scanline"></div>
 
-    <!-- NOTIFICACIONES -->
-    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-xs space-y-2"></div>
+    <div id="toast-container" class="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-xs space-y-2 px-4"></div>
 
-    <!-- PANTALLA DE CARGA -->
+    <!-- CARGA -->
     <div id="loading" class="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center">
-        <div class="w-12 h-12 border-4 border-zinc-900 border-t-[#00ff41] rounded-full animate-spin mb-4"></div>
-        <div class="terminal-font text-xl tracking-widest uppercase animate-pulse">Establishing Secure Connection...</div>
+        <div class="w-14 h-14 border-2 border-zinc-800 border-t-[#00ff41] rounded-full animate-spin mb-6"></div>
+        <div class="premium-font text-sm tracking-[0.3em] uppercase animate-pulse">Shadow Terminal Initializing...</div>
     </div>
 
-    <!-- VISTA DE AUTENTICACIÓN -->
+    <!-- LOGIN -->
     <div id="view-auth" class="hidden min-h-screen flex items-center justify-center p-6">
-        <div class="hacker-card w-full max-w-md p-8 rounded-2xl">
-            <div class="text-center mb-8">
-                <div class="text-5xl mb-2">💀</div>
-                <h1 class="terminal-font text-4xl tracking-tighter">SHADOW CC</h1>
-                <p class="text-[10px] opacity-40 uppercase tracking-widest mt-1">Nivel de Seguridad: Encriptado</p>
+        <div class="hacker-card w-full max-w-md p-8 rounded-3xl border border-[#00ff41]/20">
+            <div class="text-center mb-10">
+                <div class="text-6xl mb-4 drop-shadow-[0_0_15px_rgba(0,255,65,0.5)]">💳</div>
+                <h1 class="premium-font text-3xl tracking-tighter text-white">SHADOW <span class="text-[#00ff41]">CC</span></h1>
+                <p class="text-[9px] opacity-40 uppercase tracking-[0.4em] mt-2">Acceso de Mercado Encriptado</p>
             </div>
 
-            <div class="flex gap-4 mb-6 border-b border-zinc-900">
-                <button onclick="setAuth('login')" id="t-login" class="flex-1 pb-2 text-sm font-bold border-b-2 border-[#00ff41]">LOGIN</button>
-                <button onclick="setAuth('signup')" id="t-signup" class="flex-1 pb-2 text-sm font-bold border-b-2 border-transparent opacity-40">SIGNUP</button>
+            <div class="flex gap-4 mb-8">
+                <button onclick="setAuth('login')" id="t-login" class="flex-1 py-2 text-xs font-bold border-b-2 border-[#00ff41]">ACCEDER</button>
+                <button onclick="setAuth('signup')" id="t-signup" class="flex-1 py-2 text-xs font-bold border-b-2 border-transparent opacity-40">REGISTRO</button>
             </div>
 
             <div class="space-y-4">
-                <input type="email" id="email" placeholder="Correo Electrónico" class="w-full p-4 rounded-lg">
-                <input type="password" id="pass" placeholder="Contraseña" class="w-full p-4 rounded-lg">
-                <button onclick="handleAuthAction()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-lg uppercase transition-all active:scale-95">Acceder al Terminal</button>
+                <input type="email" id="email" placeholder="Correo Electrónico" class="w-full p-4 rounded-xl text-sm">
+                <input type="password" id="pass" placeholder="Contraseña de Seguridad" class="w-full p-4 rounded-xl text-sm">
+                <button onclick="handleAuthAction()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-xl uppercase transition-all active:scale-95 shadow-[0_0_20px_rgba(0,255,65,0.3)]">Entrar al Mercado</button>
                 
-                <div class="relative py-2 flex items-center">
-                    <div class="flex-grow border-t border-zinc-900"></div>
-                    <span class="px-3 text-[10px] opacity-40">O CONTINUAR CON</span>
-                    <div class="flex-grow border-t border-zinc-900"></div>
+                <div class="flex items-center gap-3 py-2">
+                    <div class="flex-grow h-[1px] bg-zinc-800"></div>
+                    <span class="text-[9px] opacity-30">O AUTH</span>
+                    <div class="flex-grow h-[1px] bg-zinc-800"></div>
                 </div>
 
-                <button onclick="loginGoogle()" class="w-full bg-white text-black font-bold p-4 rounded-lg flex items-center justify-center gap-3 active:scale-95 transition-all">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5"> Google Account
+                <button onclick="loginGoogle()" class="w-full bg-white text-black font-bold p-4 rounded-xl flex items-center justify-center gap-3 active:scale-95 transition-all">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5"> Google
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- APLICACIÓN PRINCIPAL -->
-    <div id="view-app" class="hidden">
-        <header class="p-5 border-b border-zinc-900 sticky top-0 bg-black/90 backdrop-blur z-50 flex justify-between items-center">
+    <!-- APP PRINCIPAL -->
+    <div id="view-app" class="hidden animate-in fade-in duration-500">
+        <header class="p-6 border-b border-white/5 sticky top-0 bg-black/80 backdrop-blur-xl z-50 flex justify-between items-center">
             <div>
-                <h1 class="terminal-font text-2xl tracking-widest text-[#00ff41]">SHADOW CC</h1>
-                <div id="user-tag" class="text-[9px] opacity-40 truncate max-w-[140px] uppercase"></div>
+                <h1 class="premium-font text-xl tracking-widest text-white">SHADOW<span class="text-[#00ff41]">CC</span></h1>
+                <div id="user-tag" class="text-[8px] opacity-40 uppercase mt-1"></div>
             </div>
-            <div class="text-[#ff3131] text-2xl animate-pulse">⚡</div>
+            <div class="flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-[#00ff41] animate-ping"></div>
+                <span class="text-[10px] text-zinc-500 uppercase font-bold tracking-tighter">Live Stock</span>
+            </div>
         </header>
 
-        <main class="p-4">
-            <!-- SECCIÓN: TIENDA -->
-            <section id="sec-store" class="subview">
-                <div class="mb-6">
-                    <input type="text" id="search" onkeyup="filterStock(this.value)" placeholder="Filtrar por BIN, País o Ciudad..." class="w-full p-4 rounded-xl">
+        <main class="p-4 max-w-5xl mx-auto">
+            <!-- TIENDA -->
+            <section id="sec-store" class="subview space-y-6">
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 opacity-30">🔍</span>
+                    <input type="text" id="search" onkeyup="filterStock(this.value)" placeholder="Buscar por BIN, País o Ciudad..." class="w-full p-4 pl-12 rounded-2xl border-none ring-1 ring-white/10 focus:ring-[#00ff41]/50 transition-all">
                 </div>
-                <div id="marketplace-grid" class="grid grid-cols-1 gap-4">
-                    <!-- Cards de CC se inyectan aquí -->
+
+                <div id="marketplace-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Se inyectan las CCs aquí -->
                 </div>
             </section>
 
-            <!-- SECCIÓN: ADMINISTRACIÓN -->
+            <!-- ADMIN -->
             <section id="sec-admin" class="subview hidden">
-                <div id="admin-login" class="hacker-card p-8 rounded-2xl text-center">
-                    <h2 class="terminal-font text-2xl mb-4">ADMIN ACCESS REQUIRED</h2>
-                    <input type="password" id="admin-key" placeholder="Password Maestro" class="w-full p-4 rounded-lg text-center mb-6 tracking-[10px]">
-                    <button onclick="unlockAdmin()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-lg uppercase">Desbloquear Panel</button>
+                <div id="admin-login" class="hacker-card p-10 rounded-3xl text-center border border-zinc-800 max-w-md mx-auto">
+                    <h2 class="premium-font text-xl mb-6 text-white tracking-widest">ADMIN PORTAL</h2>
+                    <input type="password" id="admin-key" placeholder="••••••••" class="w-full p-4 rounded-xl text-center mb-6 tracking-[10px] text-lg">
+                    <button onclick="unlockAdmin()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-xl uppercase shadow-lg shadow-[#00ff41]/20">Unlock Systems</button>
                 </div>
 
                 <div id="admin-panel" class="hidden space-y-6">
-                    <div class="hacker-card p-6 rounded-2xl">
-                        <h3 class="text-white text-xs font-bold mb-6 uppercase border-b border-zinc-800 pb-2">Registrar Nuevo Stock</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="text-[10px] opacity-50 ml-1">BIN (6-8 DÍGITOS)</label>
-                                <input type="text" id="in-bin" placeholder="4003 4499" class="w-full p-3 rounded-lg">
+                    <div class="hacker-card p-6 rounded-3xl border border-white/10">
+                        <h3 class="text-white text-[10px] font-bold mb-6 uppercase tracking-[0.2em] border-b border-white/5 pb-4">Añadir Nuevo Inventario</h3>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <input type="text" id="in-bin" placeholder="BIN (6-8 Dígitos)" class="p-4 rounded-xl text-sm">
+                                <input type="text" id="in-price" placeholder="Precio ($)" class="p-4 rounded-xl text-sm">
                             </div>
                             <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[10px] opacity-50 ml-1">PAÍS</label>
-                                    <input type="text" id="in-country" placeholder="USA 🇺🇸" class="w-full p-3 rounded-lg">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] opacity-50 ml-1">CIUDAD</label>
-                                    <input type="text" id="in-city" placeholder="Lecanto, FL" class="w-full p-3 rounded-lg">
-                                </div>
+                                <input type="text" id="in-country" placeholder="País (Ej: USA 🇺🇸)" class="p-4 rounded-xl text-sm">
+                                <input type="text" id="in-city" placeholder="Ciudad / Estado" class="p-4 rounded-xl text-sm">
                             </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="text-[10px] opacity-50 ml-1">FECHA (MM/YY)</label>
-                                    <input type="text" id="in-date" placeholder="05/28" class="w-full p-3 rounded-lg">
-                                </div>
-                                <div>
-                                    <label class="text-[10px] opacity-50 ml-1">PRECIO ($)</label>
-                                    <input type="text" id="in-price" placeholder="25.00" class="w-full p-3 rounded-lg">
-                                </div>
-                            </div>
-                            <button onclick="addStockToCloud()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-lg uppercase mt-2">Publicar en la Nube</button>
+                            <input type="text" id="in-date" placeholder="Vencimiento (MM/YY)" class="p-4 rounded-xl text-sm">
+                            <button onclick="addStockToCloud()" class="w-full bg-[#00ff41] text-black font-bold p-4 rounded-xl uppercase mt-2 active:scale-95">Subir a la Nube</button>
                         </div>
                     </div>
 
-                    <div class="hacker-card p-6 rounded-2xl">
-                        <h3 class="text-white text-xs font-bold mb-2 uppercase">Configuración de Venta</h3>
+                    <div class="hacker-card p-6 rounded-3xl border border-white/10">
+                        <h3 class="text-white text-[10px] font-bold mb-4 uppercase tracking-[0.2em]">WhatsApp de Destino</h3>
                         <div class="flex gap-2">
-                            <input type="text" id="config-phone" placeholder="50582269592" class="flex-1 p-3 rounded-lg">
-                            <button onclick="savePhone()" class="bg-zinc-800 px-4 rounded-lg font-bold text-xs uppercase">Guardar</button>
+                            <input type="text" id="config-phone" placeholder="Ej: 50582269592" class="flex-1 p-4 rounded-xl text-sm">
+                            <button onclick="savePhone()" class="bg-zinc-800 px-6 rounded-xl font-bold text-xs uppercase hover:bg-zinc-700">Guardar</button>
                         </div>
                     </div>
 
-                    <div id="admin-inventory-list" class="space-y-2">
-                        <!-- Items para borrar -->
-                    </div>
+                    <div id="admin-inventory-list" class="space-y-2"></div>
                 </div>
             </section>
         </main>
 
-        <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-        <nav class="fixed bottom-0 left-0 w-full bg-black border-t border-zinc-900 flex justify-around p-4 z-50">
-            <button onclick="changeView('store')" id="nav-store" class="nav-link active flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">🛒</span>
-                <span class="text-[10px] font-bold">STOCK</span>
+        <!-- NAV -->
+        <nav class="fixed bottom-0 left-0 w-full bg-black/90 backdrop-blur-md border-t border-white/5 flex justify-around p-5 z-[100]">
+            <button onclick="changeView('store')" id="nav-store" class="nav-link active flex flex-col items-center gap-1 transition-all">
+                <span class="text-xl">💳</span>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Stock</span>
             </button>
-            <button onclick="changeView('admin')" id="nav-admin" class="nav-link flex flex-col items-center gap-1 opacity-40">
-                <span class="text-xl">🛡️</span>
-                <span class="text-[10px] font-bold">PANEL</span>
+            <button onclick="changeView('admin')" id="nav-admin" class="nav-link flex flex-col items-center gap-1 opacity-30 transition-all">
+                <span class="text-xl">🛠️</span>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Admin</span>
             </button>
-            <button onclick="handleLogout()" class="flex flex-col items-center gap-1 opacity-40 text-[#ff3131]">
-                <span class="text-xl">🚪</span>
-                <span class="text-[10px] font-bold">SALIR</span>
+            <button onclick="handleLogout()" class="flex flex-col items-center gap-1 opacity-30 text-[#ff3131]">
+                <span class="text-xl">🔌</span>
+                <span class="text-[8px] font-bold uppercase tracking-widest">Desconectar</span>
             </button>
         </nav>
     </div>
 
-    <!-- MODAL DE PEDIDO -->
-    <div id="modal-order" class="fixed inset-0 bg-black/98 z-[6000] hidden items-center justify-center p-6">
-        <div class="hacker-card w-full max-w-sm p-8 rounded-2xl">
-            <h2 class="text-white font-bold text-xl mb-4 border-b border-zinc-900 pb-2 terminal-font tracking-widest">DETALLES DE ORDEN</h2>
-            <div id="modal-content-info" class="bg-zinc-900/40 p-5 rounded-lg mb-6 text-sm space-y-2 font-mono"></div>
+    <!-- MODAL -->
+    <div id="modal-order" class="fixed inset-0 bg-black/95 z-[6000] hidden items-center justify-center p-6 backdrop-blur-md">
+        <div class="hacker-card w-full max-w-sm p-8 rounded-[32px] border border-[#00ff41]/30">
+            <h2 class="text-white font-bold text-xl mb-6 premium-font tracking-tighter">CHECKOUT SECURE</h2>
             
-            <label class="text-[10px] opacity-40 mb-1 block">CONFIRMAR CIUDAD DE ENVÍO:</label>
-            <input type="text" id="order-city-input" placeholder="Tu Ciudad" class="w-full p-4 rounded-lg mb-6">
+            <div id="modal-content-info" class="space-y-4 mb-8"></div>
             
-            <div class="flex gap-3">
-                <button onclick="closeModal()" class="flex-1 bg-zinc-900 text-white p-4 rounded-lg font-bold transition-all active:bg-zinc-800">CERRAR</button>
-                <button onclick="sendToWhatsApp()" class="flex-[2] bg-[#00ff41] text-black p-4 rounded-lg font-bold uppercase transition-all active:scale-95">Confirmar WhatsApp</button>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] opacity-40 mb-2 block uppercase tracking-widest">Tu Ciudad de Residencia:</label>
+                    <input type="text" id="order-city-input" placeholder="Ej: Managua, NI" class="w-full p-4 rounded-xl text-sm border-none ring-1 ring-white/10">
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button onclick="closeModal()" class="flex-1 bg-zinc-900 text-zinc-400 p-4 rounded-xl font-bold text-xs uppercase transition-all">Atrás</button>
+                    <button onclick="sendToWhatsApp()" class="flex-[2] bg-[#00ff41] text-black p-4 rounded-xl font-bold text-xs uppercase transition-all active:scale-95 shadow-lg shadow-[#00ff41]/20">Solicitar WhatsApp</button>
+                </div>
             </div>
         </div>
     </div>
@@ -231,7 +245,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, setDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // FIREBASE CONFIG
+        // FIREBASE CONFIG - (Cámbialo si usas uno propio)
         const firebaseConfig = {
             apiKey: "AIzaSyC17dzIZSZtMbzu5V7dIHWdm6nDmoBN-KY",
             authDomain: "shadow-music-f033d.firebaseapp.com",
@@ -248,45 +262,47 @@
 
         let authMode = 'login', user = null, stock = [], config = { phone: "50582269592", pass: "admin123" }, currentOrder = null;
 
-        // --- NOTIFICACIONES ---
+        // NOTIF
         window.notify = (msg, isError = false) => {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = `p-4 rounded-lg text-[11px] font-bold border ${isError ? 'bg-red-900/90 border-red-500 text-white' : 'bg-black/90 border-[#00ff41] text-[#00ff41]'} shadow-xl animate-bounce`;
-            toast.innerText = msg;
+            toast.className = `p-4 rounded-2xl text-[10px] font-bold border ${isError ? 'bg-red-500/20 border-red-500/50 text-red-500' : 'bg-[#00ff41]/10 border-[#00ff41]/50 text-[#00ff41]'} backdrop-blur-md shadow-2xl animate-bounce`;
+            toast.innerText = msg.toUpperCase();
             container.appendChild(toast);
             setTimeout(() => toast.remove(), 4000);
         };
 
-        // --- AUTH ---
+        // AUTH
         window.setAuth = (mode) => {
             authMode = mode;
-            document.getElementById('t-login').className = mode === 'login' ? 'flex-1 pb-2 text-sm font-bold border-b-2 border-[#00ff41]' : 'flex-1 pb-2 text-sm font-bold border-b-2 border-transparent opacity-40';
-            document.getElementById('t-signup').className = mode === 'signup' ? 'flex-1 pb-2 text-sm font-bold border-b-2 border-[#00ff41]' : 'flex-1 pb-2 text-sm font-bold border-b-2 border-transparent opacity-40';
+            document.getElementById('t-login').className = mode === 'login' ? 'flex-1 py-2 text-xs font-bold border-b-2 border-[#00ff41]' : 'flex-1 py-2 text-xs font-bold border-b-2 border-transparent opacity-40';
+            document.getElementById('t-signup').className = mode === 'signup' ? 'flex-1 py-2 text-xs font-bold border-b-2 border-[#00ff41]' : 'flex-1 py-2 text-xs font-bold border-b-2 border-transparent opacity-40';
         };
 
         window.handleAuthAction = async () => {
             const email = document.getElementById('email').value, p = document.getElementById('pass').value;
-            if(!email || !p) return notify("Datos incompletos", true);
-            try { authMode === 'login' ? await signInWithEmailAndPassword(auth, email, p) : await createUserWithEmailAndPassword(auth, email, p); }
-            catch(err) { notify(err.message, true); }
+            if(!email || !p) return notify("Credenciales Vacías", true);
+            try { 
+                authMode === 'login' ? await signInWithEmailAndPassword(auth, email, p) : await createUserWithEmailAndPassword(auth, email, p); 
+                notify("Sistema Accedido");
+            } catch(err) { notify(err.message, true); }
         };
 
         window.loginGoogle = async () => {
             try { await signInWithPopup(auth, new GoogleAuthProvider()); }
-            catch(err) { notify("Error Google: Dominio no autorizado", true); }
+            catch(err) { notify("Error Auth Google", true); }
         };
 
         window.handleLogout = () => signOut(auth);
 
-        // --- APP STATE ---
+        // STATE
         onAuthStateChanged(auth, (u) => {
             user = u;
             document.getElementById('loading').style.display = 'none';
             if(u) {
                 document.getElementById('view-auth').classList.add('hidden');
                 document.getElementById('view-app').classList.remove('hidden');
-                document.getElementById('user-tag').innerText = `USER: ${u.email}`;
+                document.getElementById('user-tag').innerText = `NODE: ${u.email.split('@')[0]}`;
                 syncCloud();
             } else {
                 document.getElementById('view-app').classList.add('hidden');
@@ -295,7 +311,6 @@
         });
 
         function syncCloud() {
-            // Configuración
             onSnapshot(doc(db, 'artifacts', APP_UID, 'public', 'data', 'settings', 'config'), (s) => {
                 if(s.exists()) {
                     config = s.data();
@@ -305,52 +320,80 @@
                 }
             });
 
-            // Inventario Realtime
             onSnapshot(collection(db, 'artifacts', APP_UID, 'public', 'data', 'stock'), (s) => {
                 stock = s.docs.map(d => ({id: d.id, ...d.data()}));
-                renderStoreGrid();
+                renderStoreGrid(stock);
                 renderAdminView();
-            }, (e) => notify("Reglas de Seguridad Bloqueadas", true));
+            });
         }
 
-        // --- VIEWS ---
+        // NAVIGATION
         window.changeView = (v) => {
             document.querySelectorAll('.subview').forEach(x => x.classList.add('hidden'));
             document.getElementById('sec-'+v).classList.remove('hidden');
-            document.getElementById('nav-store').className = v === 'store' ? 'nav-link active flex flex-col items-center gap-1 transition-all' : 'nav-link flex flex-col items-center gap-1 opacity-40 transition-all';
-            document.getElementById('nav-admin').className = v === 'admin' ? 'nav-link active flex flex-col items-center gap-1 transition-all' : 'nav-link flex flex-col items-center gap-1 opacity-40 transition-all';
+            document.getElementById('nav-store').classList.toggle('opacity-30', v !== 'store');
+            document.getElementById('nav-store').classList.toggle('active', v === 'store');
+            document.getElementById('nav-admin').classList.toggle('opacity-30', v !== 'admin');
+            document.getElementById('nav-admin').classList.toggle('active', v === 'admin');
         };
 
-        function renderStoreGrid() {
+        // RENDER CARDS
+        function renderStoreGrid(data) {
             const grid = document.getElementById('marketplace-grid');
-            grid.innerHTML = stock.length ? '' : '<div class="text-center py-20 opacity-20 text-xs">NO_STOCK_IN_CLOUD</div>';
-            stock.forEach(item => {
+            grid.innerHTML = data.length ? '' : '<div class="col-span-full py-20 text-center opacity-20 text-xs tracking-[0.5em]">OUT_OF_STOCK</div>';
+            
+            data.forEach(item => {
                 grid.innerHTML += `
-                    <div class="hacker-card rounded-xl overflow-hidden">
-                        <div class="bg-[#00ff41] text-black text-[9px] font-bold px-3 py-1 flex justify-between">
-                            <span>VERIFIED_SYSTEM</span><span>ESTADO: DISPONIBLE</span>
-                        </div>
-                        <div class="p-5">
-                            <span class="text-2xl text-white block mb-3 tracking-widest font-bold">${item.bin}xxxx</span>
-                            <div class="space-y-1 text-[11px] opacity-60">
-                                <div class="flex justify-between"><span>CIUDAD:</span> <span class="text-white">${item.city}</span></div>
-                                <div class="flex justify-between"><span>FECHA:</span> <span class="text-white">${item.expDate}</span></div>
-                                <div class="flex justify-between"><span>PAÍS:</span> <span class="text-white">${item.country}</span></div>
+                    <div class="hacker-card p-4 rounded-[24px] border border-white/5 space-y-4">
+                        <div class="cc-visual p-6 flex flex-col justify-between">
+                            <div class="flex justify-between items-start">
+                                <div class="cc-chip shadow-inner"></div>
+                                <div class="text-[10px] text-white/50 premium-font italic uppercase">Shadow Premium</div>
                             </div>
-                            <div class="text-right text-[#ff3131] font-bold text-xl mt-4 border-t border-zinc-900 pt-3">$ ${item.price}</div>
-                            <button onclick="openCheckout('${item.id}')" class="w-full border border-[#00ff41] text-[#00ff41] p-3 rounded-lg font-bold text-[10px] mt-4 uppercase tracking-widest active:bg-[#00ff41] active:text-black">ORDENAR ACCESO</button>
+                            
+                            <div class="mt-4">
+                                <div class="text-[8px] uppercase tracking-[0.3em] text-white/30 mb-1">Secure BIN</div>
+                                <div class="text-xl md:text-2xl text-white font-mono tracking-[0.2em] drop-shadow-lg">
+                                    ${item.bin.slice(0,4)} ${item.bin.slice(4,8)} **** ****
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-end">
+                                <div class="flex-1 overflow-hidden pr-4">
+                                    <div class="text-[7px] uppercase text-white/30 tracking-widest">Region / City</div>
+                                    <div class="text-[10px] text-[#00ff41] truncate font-bold uppercase">${item.city} | ${item.country}</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-[7px] uppercase text-white/30 tracking-widest">Exp</div>
+                                    <div class="text-[11px] text-white font-mono">${item.expDate}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Reflection effect -->
+                            <div class="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-4 px-1">
+                            <div>
+                                <span class="text-[8px] block opacity-40 uppercase tracking-widest">Price</span>
+                                <span class="text-xl font-bold text-[#ff3131] premium-font">$${item.price}</span>
+                            </div>
+                            <button onclick="openCheckout('${item.id}')" class="flex-1 bg-[#00ff41] text-black text-[10px] font-bold py-3 rounded-xl uppercase tracking-widest active:scale-95 transition-all shadow-lg shadow-[#00ff41]/10">
+                                Comprar Ahora
+                            </button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        // --- ADMIN ACTIONS ---
+        // ADMIN
         window.unlockAdmin = () => {
             if(document.getElementById('admin-key').value === config.pass) {
                 document.getElementById('admin-login').classList.add('hidden');
                 document.getElementById('admin-panel').classList.remove('hidden');
-            } else { notify("Acceso Denegado: Key Incorrecta", true); }
+                notify("Sistemas Desbloqueados");
+            } else { notify("Acceso Denegado", true); }
         };
 
         window.addStockToCloud = async () => {
@@ -360,35 +403,32 @@
             const expDate = document.getElementById('in-date').value;
             const price = document.getElementById('in-price').value;
 
-            if(!bin || !price || !city || !expDate) return notify("Completa todos los campos requeridos", true);
+            if(!bin || !price || !city) return notify("Faltan Datos", true);
 
             try {
                 await addDoc(collection(db, 'artifacts', APP_UID, 'public', 'data', 'stock'), {
                     bin, country, city, expDate, price, timestamp: Date.now()
                 });
-                notify("CC registrada exitosamente");
-                document.getElementById('in-bin').value = '';
-                document.getElementById('in-price').value = '';
-                document.getElementById('in-city').value = '';
-                document.getElementById('in-date').value = '';
-            } catch (e) { notify("Error Firestore: Verifique Reglas", true); }
+                notify("Item Publicado");
+                ['in-bin', 'in-price', 'in-city', 'in-date'].forEach(id => document.getElementById(id).value = '');
+            } catch (e) { notify("Error de Escritura", true); }
         };
 
         window.deleteCC = async (id) => {
-            if(confirm("¿Eliminar este item del servidor?")) {
+            if(confirm("¿Eliminar del inventario global?")) {
                 await deleteDoc(doc(db, 'artifacts', APP_UID, 'public', 'data', 'stock', id));
-                notify("Item eliminado");
+                notify("Item Removido");
             }
         };
 
         function renderAdminView() {
             const list = document.getElementById('admin-inventory-list');
-            list.innerHTML = '<h4 class="text-[9px] opacity-30 mt-4 uppercase tracking-tighter">Administrar Inventario</h4>';
+            list.innerHTML = '<h4 class="text-[9px] opacity-20 mt-4 mb-2 uppercase tracking-widest">Lista de Control</h4>';
             stock.forEach(item => {
                 list.innerHTML += `
-                    <div class="bg-zinc-900/50 p-3 rounded-lg flex justify-between items-center text-[10px] border border-zinc-800">
-                        <span>${item.bin} - ${item.city} (${item.country})</span>
-                        <button onclick="deleteCC('${item.id}')" class="text-[#ff3131] font-bold px-3">X</button>
+                    <div class="glass-effect p-3 rounded-xl flex justify-between items-center text-[10px] border border-white/5">
+                        <span class="text-white/60">${item.bin} - ${item.city}</span>
+                        <button onclick="deleteCC('${item.id}')" class="text-[#ff3131] px-2 font-bold hover:scale-125 transition-transform">BORRAR</button>
                     </div>
                 `;
             });
@@ -397,18 +437,27 @@
         window.savePhone = async () => {
             const phone = document.getElementById('config-phone').value.replace(/\D/g, '');
             await setDoc(doc(db, 'artifacts', APP_UID, 'public', 'data', 'settings', 'config'), { ...config, phone });
-            notify("Teléfono actualizado");
+            notify("Teléfono Guardado");
         };
 
-        // --- FLOW PEDIDO ---
+        // CHECKOUT & WHATSAPP
         window.openCheckout = (id) => {
             currentOrder = stock.find(i => i.id === id);
             document.getElementById('modal-content-info').innerHTML = `
-                <div class="flex justify-between"><span>BIN:</span> <span class="text-[#00ff41]">${currentOrder.bin}xxxx</span></div>
-                <div class="flex justify-between"><span>CIUDAD:</span> <span class="text-white">${currentOrder.city}</span></div>
-                <div class="flex justify-between"><span>FECHA:</span> <span class="text-white">${currentOrder.expDate}</span></div>
-                <div class="flex justify-between"><span>PAÍS:</span> <span class="text-white">${currentOrder.country}</span></div>
-                <div class="text-[#ff3131] mt-3 font-bold text-center text-lg">TOTAL: $${currentOrder.price}</div>
+                <div class="bg-black/50 p-6 rounded-2xl border border-white/5 space-y-3">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                        <span class="text-[10px] opacity-40 uppercase">Card BIN</span>
+                        <span class="text-[#00ff41] font-mono font-bold">${currentOrder.bin}xxxx</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                        <span class="text-[10px] opacity-40 uppercase">Location</span>
+                        <span class="text-white text-xs">${currentOrder.city}, ${currentOrder.country}</span>
+                    </div>
+                    <div class="flex justify-between items-center pt-2">
+                        <span class="text-xs font-bold text-white uppercase">Monto a Pagar:</span>
+                        <span class="text-xl font-bold text-[#ff3131]">$${currentOrder.price}</span>
+                    </div>
+                </div>
             `;
             document.getElementById('modal-order').classList.remove('hidden');
             document.getElementById('modal-order').classList.add('flex');
@@ -423,9 +472,9 @@
             const clientCity = document.getElementById('order-city-input').value;
             if(!clientCity) return notify("Ingresa tu ciudad de envío", true);
 
-            const msg = `⚡ *NUEVA ORDEN - SHADOW CC* ⚡
+            const msg = `⚡ *NUEVA ORDEN - SHADOW MARKET* ⚡
 ━━━━━━━━━━━━━━━━━━━━━
-╭━━ *𝓓𝓮𝓽𝓪𝓵𝓵𝓮𝓼 𝓭𝓮 𝓵𝓪 𝓣𝓪𝓻𝓳𝓮𝓽𝓪* ━━╮
+╭━━ *𝓓𝓮𝓽𝓪𝓵𝓵𝓮𝓼 𝓭𝓮 𝓵𝓪 𝓒𝓒* ━━╮
 ┃
 ┃ 📟 *BIN:* ${currentOrder.bin}xxxx
 ┃ 🏙️ *CIUDAD:* ${currentOrder.city}
@@ -435,14 +484,14 @@
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━╯
 
-╭━━ *𝓘𝓷𝓯𝓸𝓻𝓶𝓪𝓬𝓲𝓸𝓷 𝓭𝓮𝓵 𝓒𝓵𝓲𝓮𝓷𝓽𝓮* ━━╮
+╭━━ *𝓒𝓵𝓲𝓮𝓷𝓽𝓮* ━━╮
 ┃
-┃ 👤 *Email:* ${user.email}
-┃ 🏙️ *Ciudad Envío:* ${clientCity}
+┃ 👤 *ID:* ${user.email}
+┃ 🏙️ *ENVÍO A:* ${clientCity}
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━╯
 ━━━━━━━━━━━━━━━━━━━━━
-*STATUS: PENDING_CONFIRMATION* 🚩`;
+*ESTADO: ESPERANDO PAGO* 🚩`;
 
             window.open(`https://api.whatsapp.com/send?phone=${config.phone}&text=${encodeURIComponent(msg)}`, '_blank');
             closeModal();
@@ -455,28 +504,7 @@
                 i.country.toLowerCase().includes(term) || 
                 i.city.toLowerCase().includes(term)
             );
-            
-            const grid = document.getElementById('marketplace-grid');
-            grid.innerHTML = filtered.length ? '' : '<div class="text-center py-20 opacity-20">SIN COINCIDENCIAS</div>';
-            filtered.forEach(item => {
-                grid.innerHTML += `
-                    <div class="hacker-card rounded-xl overflow-hidden">
-                        <div class="bg-[#00ff41] text-black text-[9px] font-bold px-3 py-1 flex justify-between">
-                            <span>VERIFIED_SYSTEM</span><span>ESTADO: DISPONIBLE</span>
-                        </div>
-                        <div class="p-5">
-                            <span class="text-2xl text-white block mb-3 tracking-widest font-bold">${item.bin}xxxx</span>
-                            <div class="space-y-1 text-[11px] opacity-60">
-                                <div class="flex justify-between"><span>CIUDAD:</span> <span class="text-white">${item.city}</span></div>
-                                <div class="flex justify-between"><span>FECHA:</span> <span class="text-white">${item.expDate}</span></div>
-                                <div class="flex justify-between"><span>PAÍS:</span> <span class="text-white">${item.country}</span></div>
-                            </div>
-                            <div class="text-right text-[#ff3131] font-bold text-xl mt-4 border-t border-zinc-900 pt-3">$ ${item.price}</div>
-                            <button onclick="openCheckout('${item.id}')" class="w-full border border-[#00ff41] text-[#00ff41] p-3 rounded-lg font-bold text-[10px] mt-4 uppercase tracking-widest active:bg-[#00ff41] active:text-black">ORDENAR ACCESO</button>
-                        </div>
-                    </div>
-                `;
-            });
+            renderStoreGrid(filtered);
         };
 
     </script>
